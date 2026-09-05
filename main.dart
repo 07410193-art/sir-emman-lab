@@ -9,7 +9,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Mini Task Tracker',
-      theme: ThemeData(primarySwatch: Colors.deepPurple, useMaterial3: true),
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+        useMaterial3: true,
+      ),
       home: const HomeScreen(),
       routes: {
         '/detail': (context) => const TaskDetailScreen(),
@@ -22,7 +25,11 @@ class MyApp extends StatelessWidget {
 class Task {
   final String name;
   final String status;
-  const Task({required this.name, this.status = 'Pending'});
+
+  const Task({
+    required this.name,
+    this.status = 'Pending',
+  });
 }
 
 class HomeScreen extends StatefulWidget {
@@ -39,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const Task(name: 'Call client', status: 'Complete'),
   ];
 
-  // --- Part 1: unnamed route to Add Task screen ---
+  // Go to Add Task screen using an unnamed route
   Future<void> _goToAddTask() async {
     final selectedTaskName = await Navigator.push<String>(
       context,
@@ -62,6 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // Go to Task Detail screen using a named route
   Future<void> _openTaskDetail(int index) async {
     final updatedTask = await Navigator.pushNamed(
       context,
@@ -79,21 +87,31 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mini Task Tracker')),
+      appBar: AppBar(
+        title: const Text('Mini Task Tracker'),
+      ),
       body: ListView.builder(
         itemCount: _tasks.length,
         itemBuilder: (context, index) {
           final task = _tasks[index];
           final isComplete = task.status == 'Complete';
+
           return ListTile(
             title: Text(task.name),
             subtitle: Text(task.status),
             trailing: isComplete
                 ? const CircleAvatar(
                     backgroundColor: Colors.green,
-                    child: Icon(Icons.check, color: Colors.white, size: 18),
+                    child: Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                   )
-                : const Icon(Icons.radio_button_unchecked, color: Colors.grey),
+                : const Icon(
+                    Icons.radio_button_unchecked,
+                    color: Colors.grey,
+                  ),
             onTap: () => _openTaskDetail(index),
           );
         },
@@ -106,21 +124,29 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// 2. ADD TASK SCREEN (unnamed route) — pick a preset task,
+// ADD TASK SCREEN
+// Uses an unnamed route
 
 class AddTaskScreen extends StatelessWidget {
   final List<String> presetTasks;
-  const AddTaskScreen({super.key, required this.presetTasks});
+
+  const AddTaskScreen({
+    super.key,
+    required this.presetTasks,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Task')),
+      appBar: AppBar(
+        title: const Text('Add Task'),
+      ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: presetTasks.length,
         itemBuilder: (context, index) {
           final taskName = presetTasks[index];
+
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: ElevatedButton(
@@ -130,7 +156,9 @@ class AddTaskScreen extends StatelessWidget {
                 foregroundColor: Colors.deepPurple,
                 elevation: 0,
               ),
-              onPressed: () => Navigator.pop(context, taskName),
+              onPressed: () {
+                Navigator.pop(context, taskName);
+              },
               child: Text(taskName),
             ),
           );
@@ -140,6 +168,8 @@ class AddTaskScreen extends StatelessWidget {
   }
 }
 
+// TASK DETAIL SCREEN
+// Uses a named route
 
 class TaskDetailScreen extends StatefulWidget {
   const TaskDetailScreen({super.key});
@@ -155,13 +185,14 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
     if (!_initialized) {
-      // Pull the forwarded data out of the route arguments.
       _task = ModalRoute.of(context)!.settings.arguments as Task;
       _initialized = true;
     }
   }
 
+  // Go to Mark Status screen
   Future<void> _goToMarkStatus() async {
     final newStatus = await Navigator.pushNamed(
       context,
@@ -170,26 +201,44 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     ) as String?;
 
     if (newStatus != null && newStatus != _task.status) {
-      final updatedTask = Task(name: _task.name, status: newStatus);
-      // Send the updated task straight back to Home.
-      if (mounted) Navigator.pop(context, updatedTask);
+      final updatedTask = Task(
+        name: _task.name,
+        status: newStatus,
+      );
+
+      // Return the updated task to Home
+      if (mounted) {
+        Navigator.pop(context, updatedTask);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Task Detail')),
+      appBar: AppBar(
+        title: const Text('Task Detail'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(_task.name,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 😎,
-            Text('Status: ${_task.status}',
-                style: const TextStyle(fontSize: 16, color: Colors.black54)),
+            Text(
+              _task.name,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Status: ${_task.status}',
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black54,
+              ),
+            ),
             const SizedBox(height: 24),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -207,6 +256,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 }
 
+// MARK STATUS SCREEN
+// Uses a named route
 
 class MarkStatusScreen extends StatelessWidget {
   const MarkStatusScreen({super.key});
@@ -216,14 +267,21 @@ class MarkStatusScreen extends StatelessWidget {
     final task = ModalRoute.of(context)!.settings.arguments as Task;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Update Status')),
+      appBar: AppBar(
+        title: const Text('Update Status'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(task.name,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500)),
+            Text(
+              task.name,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             const SizedBox(height: 24),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -232,7 +290,9 @@ class MarkStatusScreen extends StatelessWidget {
                 foregroundColor: Colors.deepPurple,
                 elevation: 0,
               ),
-              onPressed: () => Navigator.pop(context, 'Complete'),
+              onPressed: () {
+                Navigator.pop(context, 'Complete');
+              },
               child: const Text('Mark Complete'),
             ),
             const SizedBox(height: 12),
@@ -243,7 +303,9 @@ class MarkStatusScreen extends StatelessWidget {
                 foregroundColor: Colors.deepPurple,
                 elevation: 0,
               ),
-              onPressed: () => Navigator.pop(context, 'Pending'),
+              onPressed: () {
+                Navigator.pop(context, 'Pending');
+              },
               child: const Text('Mark Pending'),
             ),
           ],
